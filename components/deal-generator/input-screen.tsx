@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label"
 interface InputScreenProps {
   businessUrl: string
   setBusinessUrl: (value: string) => void
-  minTakeHome: number
-  setMinTakeHome: (value: number) => void
+  minTakeHome: number | ""
+  setMinTakeHome: (value: number | "") => void
   onGenerate: () => void
+  onAutofillDemo: () => void
+  isGenerateDisabled: boolean
   isLoading: boolean
 }
 
@@ -20,6 +22,8 @@ export function InputScreen({
   minTakeHome,
   setMinTakeHome,
   onGenerate,
+  onAutofillDemo,
+  isGenerateDisabled,
   isLoading,
 }: InputScreenProps) {
   return (
@@ -48,6 +52,16 @@ export function InputScreen({
           <div className="mb-8 flex items-center justify-center gap-2 text-sm text-gray-500">
             <Zap className="h-4 w-4 text-amber-500" />
             <span>Takes 30 seconds. No marketing experience required.</span>
+          </div>
+
+          <div className="mb-4 flex justify-center">
+            <button
+              type="button"
+              onClick={onAutofillDemo}
+              className="text-xs font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition-colors hover:text-emerald-800"
+            >
+              ✨ Auto-fill Sofia&apos;s Profile (Demo Mode)
+            </button>
           </div>
 
           {/* Form */}
@@ -89,8 +103,8 @@ export function InputScreen({
                   placeholder="45"
                   value={minTakeHome}
                   onChange={(e) => {
-                    const value = Number(e.target.value)
-                    setMinTakeHome(Number.isFinite(value) ? value : 0)
+                    const value = e.target.value === "" ? "" : Number(e.target.value)
+                    setMinTakeHome(value)
                   }}
                   className="h-12 pl-10 text-base shadow-sm"
                 />
@@ -100,7 +114,7 @@ export function InputScreen({
             {/* Generate Button */}
             <Button
               onClick={onGenerate}
-              disabled={isLoading}
+              disabled={isLoading || isGenerateDisabled}
               className="h-14 w-full bg-emerald-600 text-base font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl"
             >
               Generate Margin-Safe Deal

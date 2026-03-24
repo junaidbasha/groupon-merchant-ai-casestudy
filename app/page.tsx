@@ -16,6 +16,8 @@ type DealData = {
   finePrint: string
 }
 
+type TakeHomeValue = number | ""
+
 const parseDealData = (payload: unknown): DealData => {
   const raw = payload as Partial<Record<keyof DealData, unknown>>
 
@@ -43,9 +45,15 @@ const isValidDealData = (data: DealData) => {
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("input")
   const [businessUrl, setBusinessUrl] = useState("")
-  const [minTakeHome, setMinTakeHome] = useState(45)
+  const [minTakeHome, setMinTakeHome] = useState<TakeHomeValue>(45)
   const [dealData, setDealData] = useState<DealData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const normalizedUrl = businessUrl.trim().toLowerCase()
+  const isUrlLikelyValid = normalizedUrl.includes("http") || normalizedUrl.includes(".com")
+
+  const minTakeHomeNumber =
+    typeof minTakeHome === "number" && Number.isFinite(minTakeHome) ? minTakeHome : Number.NaN
 
   const handleGenerateDeal = async () => {
     if (!businessUrl.trim()) {
@@ -53,7 +61,12 @@ export default function Home() {
       return
     }
 
-    if (!Number.isFinite(minTakeHome) || minTakeHome <= 0) {
+    if (!isUrlLikelyValid) {
+      alert("Please enter a valid URL (must include http or .com).")
+      return
+    }
+
+    if (!Number.isFinite(minTakeHomeNumber) || minTakeHomeNumber <= 0) {
       alert("Please enter a valid minimum take-home amount.")
       return
     }
@@ -68,7 +81,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url: businessUrl, takeHome: minTakeHome }),
+        body: JSON.stringify({ url: businessUrl.trim(), takeHome: minTakeHomeNumber }),
       })
 
       if (!response.ok) {
@@ -99,12 +112,17 @@ export default function Home() {
     setCurrentScreen("input")
   }
 
+  const handleAutofillDemo = () => {
+    setBusinessUrl("instagram.com/sofiaslashes")
+    setMinTakeHome(48)
+  }
+
   if (currentScreen === "loading" || isLoading) {
     return <LoadingScreen />
   }
 
   if (currentScreen === "output" && dealData) {
-    return <OutputScreen dealData={dealData} minTakeHome={minTakeHome} onEdit={handleEdit} />
+    return <OutputScreen dealData={dealData} minTakeHome={minTakeHomeNumber} onEdit={handleEdit} />
   }
 
   return (
@@ -114,6 +132,8 @@ export default function Home() {
       minTakeHome={minTakeHome}
       setMinTakeHome={setMinTakeHome}
       onGenerate={handleGenerateDeal}
+      onAutofillDemo={handleAutofillDemo}
+      isGenerateDisabled={!isUrlLikelyValid || !Number.isFinite(minTakeHomeNumber) || minTakeHomeNumber <= 0}
       isLoading={isLoading}
     />
   )

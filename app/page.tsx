@@ -4,56 +4,31 @@ import { useState } from "react"
 import { InputScreen } from "@/components/deal-generator/input-screen"
 import { LoadingScreen } from "@/components/deal-generator/loading-screen"
 import { OutputScreen } from "@/components/deal-generator/output-screen"
+import {
+  DEFAULT_MIN_TAKE_HOME,
+  DEMO_BUSINESS_URL,
+  DEMO_MIN_TAKE_HOME,
+} from "@/lib/deal-generator/constants"
+import { dealDataSchema, type DealData } from "@/lib/deal-generator/schema"
+import {
+  isLikelyBusinessUrl,
+  parseTakeHomeNumber,
+  type TakeHomeValue,
+} from "@/lib/deal-generator/utils"
 
 type Screen = "input" | "loading" | "output"
-
-type DealData = {
-  dealPrice: number
-  platformFee: number
-  merchantNets: number
-  title: string
-  description: string
-  finePrint: string
-}
-
-type TakeHomeValue = number | ""
-
-const parseDealData = (payload: unknown): DealData => {
-  const raw = payload as Partial<Record<keyof DealData, unknown>>
-
-  return {
-    dealPrice: Number(raw.dealPrice),
-    platformFee: Number(raw.platformFee),
-    merchantNets: Number(raw.merchantNets),
-    title: typeof raw.title === "string" ? raw.title : "",
-    description: typeof raw.description === "string" ? raw.description : "",
-    finePrint: typeof raw.finePrint === "string" ? raw.finePrint : "",
-  }
-}
-
-const isValidDealData = (data: DealData) => {
-  return (
-    Number.isFinite(data.dealPrice) &&
-    Number.isFinite(data.platformFee) &&
-    Number.isFinite(data.merchantNets) &&
-    data.title.trim().length > 0 &&
-    data.description.trim().length > 0 &&
-    data.finePrint.trim().length > 0
-  )
-}
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("input")
   const [businessUrl, setBusinessUrl] = useState("")
-  const [minTakeHome, setMinTakeHome] = useState<TakeHomeValue>(45)
+  const [minTakeHome, setMinTakeHome] = useState<TakeHomeValue>(DEFAULT_MIN_TAKE_HOME)
   const [dealData, setDealData] = useState<DealData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const normalizedUrl = businessUrl.trim().toLowerCase()
-  const isUrlLikelyValid = normalizedUrl.includes("http") || normalizedUrl.includes(".com")
-
-  const minTakeHomeNumber =
-    typeof minTakeHome === "number" && Number.isFinite(minTakeHome) ? minTakeHome : Number.NaN
+  const hasValidUrl = isLikelyBusinessUrl(businessUrl)
+  const minTakeHomeNumber = parseTakeHomeNumber(minTakeHome)
+  const isTakeHomeValid = Number.isFinite(minTakeHomeNumber) && minTakeHomeNumber > 0
+  const isGenerateDisabled = !hasValidUrl || !isTakeHomeValid
 
   const handleGenerateDeal = async () => {
     if (!businessUrl.trim()) {
@@ -61,12 +36,12 @@ export default function Home() {
       return
     }
 
-    if (!isUrlLikelyValid) {
+    if (!hasValidUrl) {
       alert("Please enter a valid URL (must include http or .com).")
       return
     }
 
-    if (!Number.isFinite(minTakeHomeNumber) || minTakeHomeNumber <= 0) {
+    if (!isTakeHomeValid) {
       alert("Please enter a valid minimum take-home amount.")
       return
     }
@@ -90,12 +65,13 @@ export default function Home() {
       }
 
       const payload = await response.json()
-      const data = parseDealData(payload)
-      if (!isValidDealData(data)) {
+      const parsed = dealDataSchema.safeParse(payload)
+
+      if (!parsed.success) {
         throw new Error("Invalid API response")
       }
 
-      setDealData(data)
+      setDealData(parsed.data)
       setIsLoading(false)
       setCurrentScreen("output")
     } catch (error) {
@@ -113,8 +89,8 @@ export default function Home() {
   }
 
   const handleAutofillDemo = () => {
-    setBusinessUrl("instagram.com/sofiaslashes")
-    setMinTakeHome(48)
+    setBusinessUrl(DEMO_BUSINESS_URL)
+    setMinTakeHome(DEMO_MIN_TAKE_HOME)
   }
 
   if (currentScreen === "loading" || isLoading) {
@@ -133,7 +109,7 @@ export default function Home() {
       setMinTakeHome={setMinTakeHome}
       onGenerate={handleGenerateDeal}
       onAutofillDemo={handleAutofillDemo}
-      isGenerateDisabled={!isUrlLikelyValid || !Number.isFinite(minTakeHomeNumber) || minTakeHomeNumber <= 0}
+      isGenerateDisabled={isGenerateDisabled}
       isLoading={isLoading}
     />
   )

@@ -4,12 +4,13 @@ import { Link, DollarSign, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { normalizeTakeHomeInput, type TakeHomeValue } from "@/lib/deal-generator/utils"
 
 interface InputScreenProps {
   businessUrl: string
   setBusinessUrl: (value: string) => void
-  minTakeHome: number | ""
-  setMinTakeHome: (value: number | "") => void
+  minTakeHome: TakeHomeValue
+  setMinTakeHome: (value: TakeHomeValue) => void
   onGenerate: () => void
   onAutofillDemo: () => void
   isGenerateDisabled: boolean
@@ -58,6 +59,7 @@ export function InputScreen({
             <button
               type="button"
               onClick={onAutofillDemo}
+              disabled={isLoading}
               className="text-xs font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition-colors hover:text-emerald-800"
             >
               ✨ Auto-fill Sofia&apos;s Profile (Demo Mode)
@@ -102,10 +104,7 @@ export function InputScreen({
                   step="0.01"
                   placeholder="45"
                   value={minTakeHome}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? "" : Number(e.target.value)
-                    setMinTakeHome(value)
-                  }}
+                  onChange={(e) => setMinTakeHome(normalizeTakeHomeInput(e.target.value))}
                   className="h-12 pl-10 text-base shadow-sm"
                 />
               </div>

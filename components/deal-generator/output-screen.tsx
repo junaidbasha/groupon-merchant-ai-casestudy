@@ -3,17 +3,12 @@
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import type { DealData } from "@/lib/deal-generator/schema"
+import { formatCurrency } from "@/lib/deal-generator/utils"
 
 interface OutputScreenProps {
   minTakeHome: number
-  dealData: {
-    dealPrice: number
-    platformFee: number
-    merchantNets: number
-    title: string
-    description: string
-    finePrint: string
-  }
+  dealData: DealData
   onEdit: () => void
 }
 
@@ -22,8 +17,11 @@ export function OutputScreen({ minTakeHome, dealData, onEdit }: OutputScreenProp
   const meetsGoal = dealData.merchantNets >= goal
   const goalMessage =
     meetsGoal
-      ? `Meets your $${goal.toFixed(2)} take-home goal`
-      : `Below your $${goal.toFixed(2)} take-home goal`
+      ? `Meets your ${formatCurrency(goal)} take-home goal`
+      : `Below your ${formatCurrency(goal)} take-home goal`
+  const badgeStyles = meetsGoal ? "bg-emerald-100 animate-pulse" : "bg-amber-100"
+  const badgeDotStyles = meetsGoal ? "bg-emerald-500" : "bg-amber-500"
+  const badgeTextStyles = meetsGoal ? "text-emerald-800" : "text-amber-800"
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/50">
@@ -87,28 +85,28 @@ export function OutputScreen({ minTakeHome, dealData, onEdit }: OutputScreenProp
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Customer Pays:</span>
-                    <span className="font-medium text-gray-900">${dealData.dealPrice.toFixed(2)}</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(dealData.dealPrice)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Groupon Platform Fee (20%):</span>
-                    <span className="font-medium text-red-500">-${dealData.platformFee.toFixed(2)}</span>
+                    <span className="font-medium text-red-500">-{formatCurrency(dealData.platformFee)}</span>
                   </div>
 
                   <div className="my-2 border-t border-emerald-200" />
 
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-emerald-700">You Keep:</span>
-                    <span className="text-lg font-bold text-emerald-700">${dealData.merchantNets.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-emerald-700">{formatCurrency(dealData.merchantNets)}</span>
                   </div>
                 </div>
 
                 {/* Success Badge */}
-                <div className={`mt-4 flex items-center gap-2 rounded-lg px-3 py-2 ${meetsGoal ? "bg-emerald-100 animate-pulse" : "bg-amber-100"}`}>
-                  <div className={`flex h-5 w-5 items-center justify-center rounded-full ${meetsGoal ? "bg-emerald-500" : "bg-amber-500"}`}>
+                <div className={`mt-4 flex items-center gap-2 rounded-lg px-3 py-2 ${badgeStyles}`}>
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full ${badgeDotStyles}`}>
                     <Check className="h-3 w-3 text-white" />
                   </div>
-                  <span className={`text-sm font-medium ${meetsGoal ? "text-emerald-800" : "text-amber-800"}`}>
+                  <span className={`text-sm font-medium ${badgeTextStyles}`}>
                     {goalMessage}
                   </span>
                 </div>

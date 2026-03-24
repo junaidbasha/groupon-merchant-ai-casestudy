@@ -188,6 +188,7 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
                 ))}
               </div>
 
+              <label className="mt-3 block text-xs font-bold uppercase tracking-wide text-gray-600">Deal Description</label>
               <Textarea
                 value={draft.description}
                 onChange={(e) => {
@@ -195,8 +196,9 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
                   setDraft((prev) => ({ ...prev, description: e.target.value }))
                 }}
                 rows={3}
-                className="mt-3"
+                className="mt-1"
               />
+              <label className="mt-3 block text-xs font-bold uppercase tracking-wide text-gray-600">Fine Print &amp; Conditions</label>
               <Textarea
                 value={draft.finePrint}
                 onChange={(e) => {
@@ -204,7 +206,7 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
                   setDraft((prev) => ({ ...prev, finePrint: e.target.value }))
                 }}
                 rows={2}
-                className="mt-3 text-xs"
+                className="mt-1 text-xs"
               />
 
               <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4">

@@ -23,13 +23,21 @@ const EMPTY_FORM: GenerateDealRequest = {
   goal: "",
 }
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+
+const parseDemoSlowDays = (slowDays: string) => {
+  const normalized = slowDays.toLowerCase()
+  return DAYS.filter((day) => normalized.includes(day.toLowerCase()))
+}
+
 export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
   const [form, setForm] = useState<GenerateDealRequest>(EMPTY_FORM)
+  const [selectedDays, setSelectedDays] = useState<string[]>([])
 
   const isGenerateDisabled = useMemo(() => {
     return (
       !form.service.trim() ||
-      !form.slowDays.trim() ||
+      selectedDays.length === 0 ||
       !form.studioDesc.trim() ||
       !form.goal.trim() ||
       !Number.isFinite(form.price) ||
@@ -37,7 +45,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
       !Number.isFinite(form.cost) ||
       form.cost < 0
     )
-  }, [form])
+  }, [form, selectedDays])
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/50">
@@ -66,17 +74,20 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
           <div className="mb-4 flex justify-center">
             <button
               type="button"
-              onClick={() => setForm(DEMO_INPUTS)}
+              onClick={() => {
+                setForm(DEMO_INPUTS)
+                setSelectedDays(parseDemoSlowDays(DEMO_INPUTS.slowDays))
+              }}
               disabled={isLoading}
               className="text-xs font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition-colors hover:text-emerald-800"
             >
-              ✨ Demo Mode
+              ⚡ Auto-fill from Groupon Merchant Profile
             </button>
           </div>
 
           <div className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="service" className="text-sm font-medium text-gray-700">Service</Label>
+              <Label htmlFor="service" className="text-sm font-medium text-gray-700">Service Name</Label>
               <Input
                 id="service"
                 placeholder="Classic Lash Full Set"
@@ -88,7 +99,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium text-gray-700">Original Price ($)</Label>
+                <Label htmlFor="price" className="text-sm font-medium text-gray-700">Standard Price ($)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -100,7 +111,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cost" className="text-sm font-medium text-gray-700">Cost ($)</Label>
+                <Label htmlFor="cost" className="text-sm font-medium text-gray-700">Your Internal Cost ($) — Supplies & Labor</Label>
                 <Input
                   id="cost"
                   type="number"
@@ -115,13 +126,30 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
 
             <div className="space-y-2">
               <Label htmlFor="slowDays" className="text-sm font-medium text-gray-700">Slow Days</Label>
-              <Input
-                id="slowDays"
-                placeholder="Tuesday and Wednesday"
-                value={form.slowDays}
-                onChange={(e) => setForm((prev) => ({ ...prev, slowDays: e.target.value }))}
-                className="h-12 text-base shadow-sm"
-              />
+              <div className="flex flex-wrap gap-2">
+                {DAYS.map((day) => {
+                  const isActive = selectedDays.includes(day)
+
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDays((prev) =>
+                          prev.includes(day) ? prev.filter((value) => value !== day) : [...prev, day],
+                        )
+                      }}
+                      className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "border-emerald-500 bg-emerald-100 text-emerald-800"
+                          : "border-gray-300 bg-white text-gray-700 hover:border-emerald-300"
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -138,17 +166,21 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
 
             <div className="space-y-2">
               <Label htmlFor="goal" className="text-sm font-medium text-gray-700">Goal</Label>
-              <Input
+              <select
                 id="goal"
-                placeholder="Fill slow days"
                 value={form.goal}
                 onChange={(e) => setForm((prev) => ({ ...prev, goal: e.target.value }))}
-                className="h-12 text-base shadow-sm"
-              />
+                className="h-12 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm"
+              >
+                <option value="" disabled>Select a goal</option>
+                <option value="Fill slow days">Fill slow days</option>
+                <option value="Acquire long-term regulars">Acquire long-term regulars</option>
+                <option value="Test Groupon for the first time">Test Groupon for the first time</option>
+              </select>
             </div>
 
             <Button
-              onClick={() => onGenerate(form)}
+              onClick={() => onGenerate({ ...form, slowDays: selectedDays.join(", ") })}
               disabled={isLoading || isGenerateDisabled}
               className="h-14 w-full bg-emerald-600 text-base font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl"
             >

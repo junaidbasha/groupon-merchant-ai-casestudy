@@ -24,7 +24,7 @@ export const dealDataSchema = z.object({
   lowestDealPrice: z.number().finite().positive(),
   grossMargin: z.number().finite(),
   netMargin: z.number().finite(),
-  platformFeeRate: z.literal(0.30),
+  platformFeeRate: z.union([z.literal(0.20), z.literal(0.30)]),
   evalScores: evalScoresSchema,
 })
 

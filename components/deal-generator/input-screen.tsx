@@ -111,7 +111,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cost" className="text-sm font-medium text-gray-700">Your Internal Cost ($) — Supplies & Labor</Label>
+                <Label htmlFor="cost" className="text-sm font-medium text-gray-700">Your Cost ($) — Time & Materials</Label>
                 <Input
                   id="cost"
                   type="number"
@@ -125,7 +125,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="slowDays" className="text-sm font-medium text-gray-700">Slow Days</Label>
+              <Label htmlFor="slowDays" className="text-sm font-medium text-gray-700">Target Days to Fill</Label>
               <div className="flex flex-wrap gap-2">
                 {DAYS.map((day) => {
                   const isActive = selectedDays.includes(day)
@@ -153,7 +153,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="studioDesc" className="text-sm font-medium text-gray-700">Studio Description</Label>
+              <Label htmlFor="studioDesc" className="text-sm font-medium text-gray-700">Brief Studio Description</Label>
               <Textarea
                 id="studioDesc"
                 rows={3}
@@ -170,7 +170,7 @@ export function InputScreen({ onGenerate, isLoading }: InputScreenProps) {
                 id="goal"
                 value={form.goal}
                 onChange={(e) => setForm((prev) => ({ ...prev, goal: e.target.value }))}
-                className="h-12 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm"
+                className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="" disabled>Select a goal</option>
                 <option value="Fill slow days">Fill slow days</option>

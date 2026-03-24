@@ -5,6 +5,7 @@ export const DEAL_GENERATION_PROMPT = (params: {
   slowDays: string
   studioDesc: string
   goal: string
+  feeRate: number
 }) => `You are a Groupon deal creation specialist for local beauty and wellness businesses.
 
 Create a publish-ready Groupon deal for this merchant:
@@ -16,9 +17,9 @@ Create a publish-ready Groupon deal for this merchant:
 - Goal: ${params.goal}
 
 Pricing rules:
-- Deal price must be 35-55% off the regular price
+- Discount Strategy: If the goal is "Acquire long-term regulars", enforce a deeper discount (50-65% off) to drive volume. If the goal is anything else, use a standard margin-safe discount (35-50% off).
 - Create TWO service tiers (base + premium at ~25% higher)
-- Deal prices must ensure merchant nets above cost after Groupon's ~30% platform fee
+- Deal prices must ensure merchant nets above cost after Groupon's ~${params.feeRate * 100}% platform fee
 
 Category must be chosen from ONLY this list:
 "Beauty & Spas", "Eyelash Extensions", "Eyelash Lifts & Tints", "Lash & Brow",

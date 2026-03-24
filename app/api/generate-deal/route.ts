@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { DEAL_GENERATION_PROMPT, DEAL_EVAL_PROMPT } from '@/lib/deal-generator/prompts'
 import { dealDataSchema, generateDealRequestSchema } from '@/lib/deal-generator/schema'
-import { GROUPON_TAKE_RATE } from '@/lib/deal-generator/constants'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
@@ -20,6 +19,7 @@ export async function POST(req: Request) {
     }
 
     const input = validation.data
+    const currentFeeRate = input.goal === 'Test Groupon for the first time' ? 0.20 : 0.30
 
     // ── CALL 1: Generate deal ──────────────────────────────────
     const genResponse = await groq.chat.completions.create({
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       temperature: 0.4,
       messages: [
         { role: 'system', content: 'You are a Groupon deal creation specialist. Return valid JSON only.' },
-        { role: 'user', content: DEAL_GENERATION_PROMPT(input) },
+        { role: 'user', content: DEAL_GENERATION_PROMPT({ ...input, feeRate: currentFeeRate }) },
       ],
     })
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     // ── Compute margin (single source of truth) ────────────────
     const lowestDealPrice = Math.min(...rawDeal.options.map((o: any) => o.dealPrice))
     const grossMargin = lowestDealPrice - input.cost
-    const netMargin = (lowestDealPrice * (1 - GROUPON_TAKE_RATE)) - input.cost
+    const netMargin = (lowestDealPrice * (1 - currentFeeRate)) - input.cost
 
     // Recompute eval total from dimension scores (don't trust AI's stated total)
     const evalTotal = (rawEval.specificity?.score ?? 0) +
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       lowestDealPrice,
       grossMargin,
       netMargin,
-      platformFeeRate: GROUPON_TAKE_RATE,
+      platformFeeRate: currentFeeRate,
       evalScores: {
         specificity: rawEval.specificity,
         conversionLanguage: rawEval.conversionLanguage,

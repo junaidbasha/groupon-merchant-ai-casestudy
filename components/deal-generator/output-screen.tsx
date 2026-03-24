@@ -56,8 +56,9 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
   const editRate = useMemo(() => computeEditRate(editedFields.size), [editedFields])
   const editRateStatus = useMemo(() => getEditRateStatus(editRate), [editRate])
 
-  const platformFee = draft.lowestDealPrice * 0.3
-  const payout = draft.lowestDealPrice * 0.7
+  const platformFee = draft.lowestDealPrice * dealData.platformFeeRate
+  const payout = draft.lowestDealPrice * (1 - dealData.platformFeeRate)
+  const feePercentLabel = (dealData.platformFeeRate * 100).toFixed(0)
   const isProfitable = draft.netMargin > 0
   const badgeStyles = isProfitable ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
 
@@ -219,7 +220,7 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Groupon Fee (~30%)⚑</span>
+                    <span className="text-gray-600">Groupon Fee (~{feePercentLabel}%)⚑</span>
                     <span className="font-medium text-red-500">-{formatCurrency(platformFee)}</span>
                   </div>
 
@@ -239,7 +240,7 @@ export function OutputScreen({ minTakeHome: _minTakeHome, dealData, onEdit }: Ou
                 <div className={`mt-4 rounded-lg px-3 py-2 text-sm font-medium ${badgeStyles}`}>
                   {isProfitable ? "✅ Margin-Safe: Profitable" : "⚠️ Loss Leader"}
                 </div>
-                <p className="text-xs text-gray-400 mt-2">⚑ Platform fee shown as 30% — actual rate varies by deal type and contract. Verify with your Groupon account manager.</p>
+                <p className="text-xs text-gray-400 mt-2">⚑ Platform fee shown as {feePercentLabel}% based on your selected goal — actual rate varies by deal type and contract. Verify with your Groupon account manager.</p>
               </div>
 
               {showPMView && (

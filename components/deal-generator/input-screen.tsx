@@ -6,19 +6,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface InputScreenProps {
-  bookingUrl: string
-  setBookingUrl: (value: string) => void
-  minTakeHome: string
-  setMinTakeHome: (value: string) => void
+  businessUrl: string
+  setBusinessUrl: (value: string) => void
+  minTakeHome: number
+  setMinTakeHome: (value: number) => void
   onGenerate: () => void
+  isLoading: boolean
 }
 
 export function InputScreen({
-  bookingUrl,
-  setBookingUrl,
+  businessUrl,
+  setBusinessUrl,
   minTakeHome,
   setMinTakeHome,
   onGenerate,
+  isLoading,
 }: InputScreenProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/50">
@@ -63,8 +65,8 @@ export function InputScreen({
                   id="booking-url"
                   type="url"
                   placeholder="e.g., vagaro.com/sofiaslashes"
-                  value={bookingUrl}
-                  onChange={(e) => setBookingUrl(e.target.value)}
+                  value={businessUrl}
+                  onChange={(e) => setBusinessUrl(e.target.value)}
                   className="h-12 pl-10 text-base shadow-sm"
                 />
               </div>
@@ -82,9 +84,14 @@ export function InputScreen({
                 <Input
                   id="min-takehome"
                   type="number"
+                  min={1}
+                  step="0.01"
                   placeholder="45"
                   value={minTakeHome}
-                  onChange={(e) => setMinTakeHome(e.target.value)}
+                  onChange={(e) => {
+                    const value = Number(e.target.value)
+                    setMinTakeHome(Number.isFinite(value) ? value : 0)
+                  }}
                   className="h-12 pl-10 text-base shadow-sm"
                 />
               </div>
@@ -93,6 +100,7 @@ export function InputScreen({
             {/* Generate Button */}
             <Button
               onClick={onGenerate}
+              disabled={isLoading}
               className="h-14 w-full bg-emerald-600 text-base font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl"
             >
               Generate Margin-Safe Deal

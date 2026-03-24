@@ -5,15 +5,24 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
 interface OutputScreenProps {
-  minTakeHome: string
+  minTakeHome: number
+  dealData: {
+    dealPrice: number
+    platformFee: number
+    merchantNets: number
+    title: string
+    description: string
+    finePrint: string
+  }
   onEdit: () => void
 }
 
-export function OutputScreen({ minTakeHome, onEdit }: OutputScreenProps) {
-  const customerPays = 60.0
-  const platformFee = customerPays * 0.2
-  const youKeep = customerPays - platformFee
-  const goal = parseFloat(minTakeHome) || 45
+export function OutputScreen({ minTakeHome, dealData, onEdit }: OutputScreenProps) {
+  const goal = minTakeHome || 45
+  const goalMessage =
+    dealData.merchantNets >= goal
+      ? `Meets your $${goal.toFixed(2)} take-home goal`
+      : `Below your $${goal.toFixed(2)} take-home goal`
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/50">
@@ -55,17 +64,17 @@ export function OutputScreen({ minTakeHome, onEdit }: OutputScreenProps) {
             <div className="p-5">
               {/* Title */}
               <h2 className="text-xl font-bold text-gray-900">
-                Premium Keratin Lash Lift & Tint
+                {dealData.title}
               </h2>
 
               {/* Description */}
               <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                Instantly lift, curl, and darken your natural lashes with our signature keratin treatment. Results last 6-8 weeks.
+                {dealData.description}
               </p>
 
               {/* Fine Print */}
               <p className="mt-3 text-xs text-gray-500">
-                Promotional value expires 120 days after purchase. Appointment required.
+                {dealData.finePrint}
               </p>
 
               {/* Margin Box */}
@@ -77,19 +86,19 @@ export function OutputScreen({ minTakeHome, onEdit }: OutputScreenProps) {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Customer Pays:</span>
-                    <span className="font-medium text-gray-900">${customerPays.toFixed(2)}</span>
+                    <span className="font-medium text-gray-900">${dealData.dealPrice.toFixed(2)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Groupon Platform Fee (20%):</span>
-                    <span className="font-medium text-red-500">-${platformFee.toFixed(2)}</span>
+                    <span className="font-medium text-red-500">-${dealData.platformFee.toFixed(2)}</span>
                   </div>
 
                   <div className="my-2 border-t border-emerald-200" />
 
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-emerald-700">You Keep:</span>
-                    <span className="text-lg font-bold text-emerald-700">${youKeep.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-emerald-700">${dealData.merchantNets.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -99,7 +108,7 @@ export function OutputScreen({ minTakeHome, onEdit }: OutputScreenProps) {
                     <Check className="h-3 w-3 text-white" />
                   </div>
                   <span className="text-sm font-medium text-emerald-800">
-                    Exceeds your ${goal.toFixed(2)} take-home goal
+                    {goalMessage}
                   </span>
                 </div>
               </div>

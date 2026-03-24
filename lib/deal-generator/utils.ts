@@ -1,18 +1,11 @@
-export type TakeHomeValue = number | ""
+export const TOTAL_EDITABLE_FIELDS = 6
 
-export const normalizeTakeHomeInput = (rawValue: string): TakeHomeValue => {
-  return rawValue === "" ? "" : Number(rawValue)
+export function computeEditRate(editedCount: number): number {
+  return Math.round((editedCount / TOTAL_EDITABLE_FIELDS) * 100)
 }
 
-export const parseTakeHomeNumber = (value: TakeHomeValue): number => {
-  return typeof value === "number" && Number.isFinite(value) ? value : Number.NaN
-}
-
-export const isLikelyBusinessUrl = (value: string): boolean => {
-  const normalized = value.trim().toLowerCase()
-  return normalized.includes("http") || normalized.includes(".com")
-}
-
-export const formatCurrency = (value: number): string => {
-  return `$${value.toFixed(2)}`
+export function getEditRateStatus(pct: number): 'low' | 'target' | 'high' {
+  if (pct < 15) return 'low'
+  if (pct > 50) return 'high'
+  return 'target'
 }

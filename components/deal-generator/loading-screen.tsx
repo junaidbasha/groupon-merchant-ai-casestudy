@@ -4,10 +4,10 @@ import { useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const loadingMessages = [
-  "Scraping your service menu...",
-  "Analyzing local deal performance...",
-  "Calculating margin-safe pricing...",
-  "Writing high-converting copy...",
+  "Call 1 — drafting your deal copy...",
+  "Computing margin-safe pricing...",
+  "Call 2 — scoring deal quality...",
+  "Almost done...",
 ]
 
 export function LoadingScreen() {
